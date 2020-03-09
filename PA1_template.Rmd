@@ -11,7 +11,10 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Loading and preprocessing the data
+## Week 2 - Course Project 1
+## Peer-Graded Assignment
+
+### 1. Code for reading in the dataset and/or processing the data
 * Unzip and read the dataset
 ```{r reading}
 if(!file.exists('activity.csv')){
@@ -21,18 +24,55 @@ activity <- read.csv('activity.csv')
 activity$date<-as.Date(as.character(activity$date))
 ```
 
-## What is mean total number of steps taken per day?
+### 2. Histogram of the total number of steps taken each day
+* Plot the histogram
+```{r histogram}
+library(ggplot2)
+stepActivity <- tapply(activity$steps, activity$date, sum, na.rm=TRUE)
+
+g <- qplot(stepActivity, xlab = 'Total steps per day', ylab = 'Frequency using binwidth 1000', binwidth=1000)
+plot(g)
+```
+
+### 3. Mean and median number of steps taken each day
+```{r averages}
+meanStep <- mean(stepActivity)
+medianStep <- median(stepActivity)
+
+g <- g + geom_vline(color= 'blue', xintercept = meanStep) +
+  geom_vline(color= 'red', linetype = "dotdash", xintercept = medianStep) +
+  ggtitle("Total Steps Each Day")
+plot(g)
+```
+
+* Mean: `r format(meanStep, digits=2, nsmall=2)`
+* Median: `r format(medianStep, digits=2, nsmall=2)`
+
+### 4. Time series plot of the average number of steps taken
+```{r timeseries}
+avg_steps_taken <- aggregate(steps ~ interval, activity, mean)
 
 
+g <- ggplot(data=avg_steps_taken, aes(x=interval, y=steps)) +
+  geom_line() + xlab("5-minute interval") +
+  ylab("Average number of steps taken") +
+  ggtitle("Average Number of Steps per Day by Interval")
+plot(g)
 
-## What is the average daily activity pattern?
+```
+
+### 5. The 5-minute interval that, on average, contains the maximum number of steps
+* Maximum number of steps is at: `r avg_steps_taken$interval[which.max(avg_steps_taken$steps)]`
+
+### 6. Code to describe and show a strategy for imputing missing data
+```{r missing}
+missing <- is.na(activity$steps)
+```
+* The total number of missing values in the dataset is: `r sum(missing)`
 
 
+### 7. Histogram of the total number of steps taken each day after missing values are imputed
 
-## Imputing missing values
+### 8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
 
-
-
-## Are there differences in activity patterns between weekdays and weekends?
-
-
+### 9. All of the R code needed to reproduce the results (numbers, plots, etc.) in the report

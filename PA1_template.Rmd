@@ -97,3 +97,4 @@ xyplot(avg_steps_taken_imputed$steps ~ avg_steps_taken_imputed$interval|avg_step
 ```
 
 ### 9. All of the R code needed to reproduce the results (numbers, plots, etc.) in the report
+* Generated and sumbitted !

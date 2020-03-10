@@ -30,7 +30,7 @@ activity$date<-as.Date(as.character(activity$date))
 library(ggplot2)
 stepActivity <- tapply(activity$steps, activity$date, sum, na.rm=TRUE)
 
-g <- qplot(stepActivity, xlab = 'Total steps per day', ylab = 'Frequency using binwidth 1000', binwidth=1000)
+g <- qplot(stepActivity, xlab = 'Total steps per day', ylab = 'Frequency using binwidth 1000', main= 'Total Steps Each Day', binwidth=1000)
 plot(g)
 ```
 
@@ -66,13 +66,34 @@ plot(g)
 
 ### 6. Code to describe and show a strategy for imputing missing data
 ```{r missing}
-missing <- is.na(activity$steps)
+missing<-is.na(activity$steps)
 ```
 * The total number of missing values in the dataset is: `r sum(missing)`
 
 
 ### 7. Histogram of the total number of steps taken each day after missing values are imputed
+* Impute missing step by instering the average for that interval
+* 2012-10-01 is the first day and all values are missing, following day has only 126 step. Hence zero to be replaced for 2012-10-01
+```{r impute_missing_steps}
+activityImputed <- transform(activity, steps = ifelse(is.na(activity$steps), avg_steps_taken$steps[match(activity$interval, avg_steps_taken$interval)], activity$steps))
+activityImputed[as.character(activityImputed$date) == "2012-10-01",1 ] <- 0
+
+stepActivityImputed <- tapply(activityImputed$steps, activityImputed$date, sum)
+
+qplot(stepActivity, xlab = 'Total steps per day', ylab = 'Frequency using binwidth 1000', main= 'Total Steps Each Day (non-Imputed)', binwidth=1000)
+qplot(stepActivityImputed, xlab = 'Total steps per day', ylab = 'Frequency using binwidth 1000', main= 'Total Steps Each Day (Imputed)', binwidth=1000)
+```
+
 
 ### 8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+```{r weekday_weekend}
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+activityImputed$dow <- as.factor(ifelse(is.element(weekdays(as.Date(activityImputed$date)),weekdays), "Weekday", "Weekend"))
+avg_steps_taken_imputed <- aggregate(steps ~ interval + dow, activityImputed, mean)
+
+library(lattice)
+xyplot(avg_steps_taken_imputed$steps ~ avg_steps_taken_imputed$interval|avg_steps_taken_imputed$dow, main="Average Steps per Day by Interval",xlab="Interval", ylab="Steps",layout=c(1,2), type="l")
+
+```
 
 ### 9. All of the R code needed to reproduce the results (numbers, plots, etc.) in the report
